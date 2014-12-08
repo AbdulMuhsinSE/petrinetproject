@@ -292,6 +292,8 @@ td { padding: 2px; text-align: center;}
     }
 
     var reachabilityTree = function() {
+      AllMarkings = new Array();
+      EdgesExtra = new Array();
       a = new Marking(null);
       AllMarkings.push(a);
       a.Marking = initialMarking();
@@ -318,6 +320,7 @@ td { padding: 2px; text-align: center;}
       ]);
 
       // create a network
+      $("#network").empty();
       var container = $('#network').get(0);
       var data = {
         nodes: nodes,
@@ -349,7 +352,7 @@ td { padding: 2px; text-align: center;}
           markings.push(node.Children[i]);
         }
       }
-      //edges.add(EdgesExtra);
+      edges.add(EdgesExtra);
     }
     $(window).load(function () {
       $(".input .body").bind("input", function(evt) {
