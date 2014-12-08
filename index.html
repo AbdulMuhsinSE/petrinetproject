@@ -229,6 +229,7 @@ td { padding: 2px; text-align: center;}
           EdgesExtra.push({id: edgecount++, to: this.Id, from: this.Id});
           return false;
         }
+
         for(var i = 0; i < AllMarkings.length; i++) {
           //draw to other
           if(Child.equals(AllMarkings[i])) {
@@ -264,6 +265,11 @@ td { padding: 2px; text-align: center;}
         return this.addChild(tempMarking);
       },
       transitionEnabled: function(transitionIn) {
+        var allzeros = true;
+        for (var i = 0; i < transitionIn.length; i++) {
+          if(transitionIn[i] != 0) allzeros = false;
+        }
+        if (allzeros) return false;
         for (var i = 0; i < transitionIn.length; i++) {
     			if(transitionIn[i] > this.Marking[i] && this.Marking[i] != -1) return false;
         }
@@ -335,7 +341,7 @@ td { padding: 2px; text-align: center;}
             fontColor: 'white',
           },
           nottest: {
-        
+
             fontColor: 'white',
           }
         },
