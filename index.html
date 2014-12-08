@@ -328,10 +328,18 @@ td { padding: 2px; text-align: center;}
       };
 
       var options = {
-
-        hierarchicalLayout: {
-            direction: "UD"
+        groups: {
+          test: {
+            // defaults for nodes in this group
+            color: 'black',
+            fontColor: 'white',
+          },
+          nottest: {
+        
+            fontColor: 'white',
+          }
         },
+
         stabilize: false,
         smoothCurves: false,
         edges: {
@@ -343,11 +351,11 @@ td { padding: 2px; text-align: center;}
 
       //nodes.add({id: 1, label: root.Marking});
       var markings = [root];
-      nodes.add({id: root.Id, label: root.stringForMarking(), level: root.Level});
+      nodes.add({id: root.Id, label: root.stringForMarking(), level: root.Level, group: "test"});
       while(markings.length != 0) {
         var node = markings.pop();
         for(var i = 0; i < node.Children.length; i++) {
-          nodes.add({id: node.Children[i].Id, label: node.Children[i].stringForMarking(), level: node.Children[i].Level});
+          nodes.add({id: node.Children[i].Id, label: node.Children[i].stringForMarking(), level: node.Children[i].Level, group: "nottest"});
           edges.add({id: edgecount++, from: node.Id, to: node.Children[i].Id});
           markings.push(node.Children[i]);
         }
