@@ -1,7 +1,7 @@
 <!doctype html>
 <html>
 <head>
-  <title>Network | DataSet</title>
+  <title>PetrinetProject</title>
 
   <style type="text/css">
     .inputcontainer { overflow: hidden; }
@@ -383,6 +383,171 @@ $(".marking .body").bind("input", function(evt) {
       var n = ~~Number(str);
       return String(n) === str && n >= 0;
     }
+
+    var isStateMachine = true;
+        var isMarkedGraph = true;
+        var isFreeChoice = true;
+        var isExtendedFreeChoice = true;
+        var isAC = true;
+        function calculateSM(iArray,oArray){
+                for(i=0;i<iArray[0].length;i++){
+                        var transValue =0;
+                        console.log(this.isStateMachine);
+                        for(j=0;j<iArray.length;j++){
+                                if(iArray[j][i]!=0){
+                                        transValue++;
+                                }
+                        }
+
+                        if(transValue!=1){
+                                this.isStateMachine = false;
+                                console.log(this.isStateMachine);
+                                calculateMG(iArray,oArray);
+                                break;
+                        }
+                }
+                for(i=0;i<iArray[0].length;i++){
+                        var transValue = 0;
+                        for(j=0;j<iArray.length;j++){
+                                if(oArray[j][i]!=0){
+                                        transValue++;
+                                }
+                        }
+
+                        if(transValue!=1){
+                                this.isStateMachine = false;
+                                console.log(this.isStateMachine);
+                                calculateMG(iArray,oArray);
+                                break;
+                        }
+                }
+                console.log(this.isStateMachine);
+        }
+
+        function calculateMG(iArray,oArray){
+                for(i=0;i<iArray.length;i++){
+                        var placeValue = 0;
+                        for(j=0;j<iArray[i].length;j++){
+                                if(iArray[i][j]!=0){
+                                        placeValue++;
+                                }
+                        }
+
+                        if(placeValue!=1){
+                                this.isMarkedGraph = false;
+                                console.log(this.isMarkedGraph);
+                                calculateFC(iArray,oArray);
+                                break;
+                        }
+                }
+
+                for(i=0;i<iArray.length;i++){
+                        var placeValue = 0;
+                        for(j=0;j<iArray[i].length;j++){
+                                if(oArray[i][j]!=0){
+                                        placeValue++;
+                                }
+                        }
+
+                        if(placeValue!=1){
+                                this.isMarkedGraph = false;
+                                console.log(this.isMarkedGraph);
+                                calculateFC(iArray,oArray);
+                                break;
+                        }
+                }
+                console.log(this.isMarkedGraph);
+        }
+
+        function calculateFC(iArray,oArray){
+                var transValue = 0;
+                var placeValue = 0;
+
+                for(i=0;i<iArray[0].length;i++){
+                        for(j=0;j<iArray.length;j++){
+                                if(iArray[j][i]!=0){
+                                        transValue++;
+                                }
+                        }
+
+                        if(transValue!=1){
+                                this.isFreeChoice = false;
+                                calculateEFC(iArray,oArray);
+                                break;
+                        }
+                }
+
+                for(i=0;i<iArray.length;i++){
+                        for(j=0;j<iArray[i].length;j++){
+                                if(iArray[i][j]!=0){
+                                        placeValue++;
+                                }
+                        }
+
+                        if(placeValue!=1){
+                                this.isFreeChoice = false;
+                                calculateEFC(iArray,oArray);
+                                break;
+                        }
+                }
+        }
+
+        function calculateEFC(iArray,oArray){
+
+                for(i=0;i<iArray.length;i++){
+                        var positions = [];
+                        for(j=0;j<iArray[i].length;j++){
+                                if(iArray[i][j]!=0){
+                                        positions.push(j);
+                                }
+                        }
+
+                        if(positions.length>1){
+                                var x = positions.length-1;
+                                for(i=0;i<x;i++){
+                                        for(j=0;j<iArray.length;j++){
+                                                r = i+1;
+                                                if((iArray[j][positions[i]]) != (iArray[j][positions[r]])){
+                                                        this.isExtendedFreeChoice = false;
+                                                        calculateAC(iArray,oArray);
+                                                        break;
+                                                }
+                                        }
+                                }
+                        }
+                        if(positions.length == iArray[0].length){
+                                break;
+                        }
+                }
+
+        }
+
+        function calculateAC(iArray,oArray){
+                var p1inp2;
+                var p2inp1;
+                for(i=0;i<iArray.length;i++){
+                        p1inp2 = false;
+                        p2inp1 = false;
+                        for(j=0;j<iArray[0].length;j++){
+                                r= j+1;
+                                if((iArray[i][j])==(iArray[i][r])){
+                                        for(y=(i+1);y<iArray.length;y++){
+                                                if(iArray[y][j]>iArray[y][r]){
+                                                        p2inp1 = true;
+
+                                                } else if(iArray[y][j]<iArray[y][r]){
+                                                        p1inp2 = true;
+
+                                                }
+                                                if(p2inp1 == true && p2inp1 == true){
+                                                        this.isAC = false;
+                                                        break;
+                                                }
+                                        }
+                                }
+                        }
+                }
+        }
   </script>
 </head>
 
