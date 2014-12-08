@@ -1,0 +1,531 @@
+<!doctype html>
+<html>
+<head>
+  <title>Network | DataSet</title>
+
+  <style type="text/css">
+    .inputcontainer { overflow: hidden; }
+.relativeContainer { position: relative; width: 100%; height: 166px; overflow: hidden;
+
+
+color: #555;
+background-color: #eee;
+border: 1px solid #ccc;
+border-radius: 4px;
+
+ }
+.marking { position: relative; width: 100%; height: 50px; overflow: hidden;}
+
+td { padding: 2px; }
+
+.fixedTB { position: absolute; left: 0px; top: 0px; z-index: 11;  }
+
+.leftContainer { position: absolute; left: 0px; top: 22px; height: 150px; overflow: hidden;  }
+
+.rightContainer { position: absolute; left: 71px; top: 0px; width: 380px; overflow: hidden; }
+
+.leftSBWrapper { position: relative; left: 0px; top: 0px; z-index: 10; }
+.topSBWrapper { position: relative; left: 0px; top: 0px; z-index: 10; }
+
+.SBWrapper { width: 380px; height: 140px; overflow: auto; }
+
+
+    .centerbuffer {
+      width: 10px;
+    }
+    table {
+        table-layout:fixed;
+    }
+    html {
+      height: 100%;
+    }
+    body {
+      height: 100%;
+      min-height: 100%;
+    }
+    #container {
+      position: absolute;
+      top: 51px;
+      bottom: 0;
+      left: 0;
+      right: 0;
+
+    }
+    #network {
+      width: 50%;
+      height: 100%;
+      border: 1px solid lightgray;
+      float: left;
+    }
+    #form {
+      width: 50%;
+      height: 100%;
+      border: 1px solid lightgray;
+      float: right;
+      padding: 10px 10px 10px 10px;
+    }
+    .panel-default {
+      height: 300px !important;
+      overflow: scroll;
+    }
+  </style>
+
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.10.1/jquery.min.js"></script>
+  <script type="text/javascript" src="./dist/vis.js"></script>
+  <link href="./dist/vis.css" rel="stylesheet" type="text/css" />
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+
+  <script type="text/javascript">
+
+    $(function () {
+    $('.SBWrapper').scroll(function () {
+        var rc = $(this).closest('.relativeContainer');
+        var lfW = rc.find('.leftSBWrapper');
+        var tpW = rc.find('.topSBWrapper');
+
+        lfW.css('top', ($(this).scrollTop()*-1));
+        tpW.css('left', ($(this).scrollLeft()*-1));
+    });
+});
+
+
+
+
+
+    var nodes, edges, network;
+    var clearTable = function() {
+      $(".output .left").empty();
+      $(".output .body").empty();
+      $(".output .head").empty();
+      $(".input .left").empty();
+      $(".input .body").empty();
+      $(".input .head").empty();
+      $(".marking .head").empty();
+      $(".marking .body").empty();
+    }
+    var populateTable = function(places, transitions) {
+      $(".rightContainer").each(function() {
+        $(this).width($(".inputcontainer").first().width() - 60);
+      });
+      $(".SBWrapper").each(function() {
+        $(this).width($(".inputcontainer").first().width() - 60);
+      });
+      for (var i = 0; i < transitions; i++) {
+        $(".input .left").append("<tr><td width=40px>T" + i + "</td></tr>");
+        $(".input .body").append("<tr id=\"ti" + i +"\"></tr>");
+        for (var j = 0; j < places; j++) {
+          $("#ti"+i).append("<td width=40px contentEditable=\"true\">0</td>");
+
+
+        }
+        $(".output .left").append("<tr><td width=40px>T" + i + "</td></tr>");
+        $(".output .body").append("<tr id=\"to" + i +"\"></tr>")
+        for (var j = 0; j < places; j++) {
+          $("#to"+i).append("<td width=40px contentEditable=\"true\">0</td>")
+
+
+        }
+
+
+      }
+      $(".marking .body").append("<tr id=\"m\"></tr>");
+
+      for (var j = 0; j < places; j++) {
+        $("#m").append("<td width=40px contentEditable=\"true\">0</td>")
+
+
+      }
+      $(".marking .left").append("<tr><td width=40px>M" + 0 + "</td></tr>");
+
+      for (var j = 0; j < places; j++) {
+        $(".input .head").append("<td width=40px>P" + j + "</td>")
+        $(".output .head").append("<td width=40px>P" + j + "</td>")
+        $(".marking .head").append("<td width=40px>P" + j + "</td>")
+
+
+      }
+
+    }
+    var updateTables = function() {
+      if($("#places").val()=="") {
+        $("#places").val(1);
+      }
+      if($("#transitions").val() =="") {
+        $("#transitions").val(1);
+      }
+      clearTable();
+      populateTable($("#places").val(),$("#transitions").val())
+    }
+    var initialMarking = function() {
+      var input = new Array();
+      $("#m").children().each(function() {
+        var cell = parseInt($(this).html());
+        if (isNaN(cell)) {
+          cell = 0;
+        }
+          input.push(cell);
+      });
+      return input;
+    }
+    var inputMatrix = function() {
+        var input = new Array();
+        var transitions = $("#transitions").val();
+        var places = $("#places").val();
+        for (var i = 0; i < transitions; i++) {
+          input[i] = new Array();
+          $("#ti" + i).children().each(function () {
+            var cell = parseInt($(this).html());
+            if (isNaN(cell)) {
+              cell = 0;
+            }
+              input[i].push(cell);
+          });
+        }
+        return input;
+    }
+    var outputMatrix = function() {
+        var input = new Array();
+        var transitions = $("#transitions").val();
+        var places = $("#places").val();
+        for (var i = 0; i < transitions; i++) {
+          input[i] = new Array();
+          $("#to" + i).children().each(function () {
+              var cell = parseInt($(this).html());
+              if (isNaN(cell)) {
+                cell = 0;
+              }
+                input[i].push(cell);
+          });
+        }
+        return input;
+    }
+
+    //Display shit dont touch
+    // convenience method to stringify a JSON object
+    function toJSON (obj) {
+      return JSON.stringify(obj, null, 4);
+    }
+    var AllMarkings = new Array();
+
+    function Marking(parentNode)
+    {
+      this.Level = 0;
+      this.Id = 0;
+      this.Parent = parentNode;
+      this.Terminal = false;
+      this.Marking = new Array();
+      this.Children = new Array();
+    }
+    var edgecount = 0;
+    var EdgesExtra = new Array();
+    Marking.prototype = {
+      Count: 0,
+      addChild: function(marking) {
+        var Child = new Marking(this);
+        Child.Marking = marking;
+        Child.markOmega();
+        if (Child.equals(this)) {
+          //draw to itself
+          EdgesExtra.push({id: edgecount++, to: this.Id, from: this.Id});
+          return false;
+        }
+        for(var i = 0; i < AllMarkings.length; i++) {
+          //draw to other
+          if(Child.equals(AllMarkings[i])) {
+            EdgesExtra.push({id: edgecount++, to: AllMarkings[i].Id, from: this.Id});
+            return false;
+          }
+        }
+        this.Children.push(Child);
+
+        Child.Level = this.Level + 1;
+        Child.Id = ++Marking.prototype.Count;
+        AllMarkings.push(Child);
+        return Child;
+      },
+      fireTransitions: function(input, output) {
+        if (this.Terminal) return false;
+        for(var i = 0; i < input.length; i++) {
+          if (this.transitionEnabled(input[i])) this.fireTransition(input[i], output[i]);
+        }
+        for(var i = 0; i < this.Children.length; i++) {
+          if(!this.Children[i].Terminal) this.Children[i].fireTransitions(input, output);
+        }
+      },
+      fireTransition: function(transitionIn, transitionOut) {
+        //shitty clone
+        var tempMarking = this.Marking.slice(0);
+        for(var i = 0; i < transitionIn.length; i++) {
+          if(tempMarking[i] != -1) {
+            tempMarking[i] -= transitionIn[i];
+            tempMarking[i] += transitionOut[i];
+          }
+        }
+        return this.addChild(tempMarking);
+      },
+      transitionEnabled: function(transitionIn) {
+        for (var i = 0; i < transitionIn.length; i++) {
+    			if(transitionIn[i] > this.Marking[i] && this.Marking[i] != -1) return false;
+        }
+        return true;
+      },
+      markOmega: function() {
+        for (var i = 0; i < this.Marking.length; i++) {
+          if(this.Marking[i] < this.Parent.Marking[i]) return;
+        }
+    		for (var i = 0; i < this.Marking.length; i++) {
+    			if (this.Marking[i] > this.Parent.Marking[i]) this.Marking[i] = -1;
+    		}
+      },
+      markTerminal: function() {
+        this.Terminal = true;
+      },
+      equals: function(other) {
+        for (var i = 0; i < this.Marking.length; i++) {
+          if (this.Marking[i] != other.Marking[i]) return false;
+        }
+        return true;
+      },
+      stringForMarking: function() {
+        return this.Marking.join(",").replace(new RegExp("-1", 'g'), String.fromCharCode("969"));
+      }
+    }
+
+    var reachabilityTree = function() {
+      a = new Marking(null);
+      AllMarkings.push(a);
+      a.Marking = initialMarking();
+      a.fireTransitions(inputMatrix(), outputMatrix());
+      makeTree(a);
+    }
+
+    function makeTree(root) {
+      // create an array with nodes
+      nodes = new vis.DataSet();
+      nodes.subscribe('*', function () {
+        $('#nodes').html(toJSON(nodes.get()));
+      });
+      nodes.add([
+      ]);
+
+      // create an array with edges
+      edges = new vis.DataSet();
+      edges.subscribe('*', function () {
+        $('#edges').html(toJSON(edges.get()));
+      });
+      edges.add([
+
+      ]);
+
+      // create a network
+      var container = $('#network').get(0);
+      var data = {
+        nodes: nodes,
+        edges: edges
+      };
+
+      var options = {
+
+        hierarchicalLayout: {
+            direction: "UD"
+        },
+        stabilize: false,
+        smoothCurves: false,
+        edges: {
+          style: 'arrow'
+        }
+
+      };
+      network = new vis.Network(container, data, options);
+
+      //nodes.add({id: 1, label: root.Marking});
+      var markings = [root];
+      nodes.add({id: root.Id, label: root.stringForMarking(), level: root.Level});
+      while(markings.length != 0) {
+        var node = markings.pop();
+        for(var i = 0; i < node.Children.length; i++) {
+          nodes.add({id: node.Children[i].Id, label: node.Children[i].stringForMarking(), level: node.Children[i].Level});
+          edges.add({id: edgecount++, from: node.Id, to: node.Children[i].Id});
+          markings.push(node.Children[i]);
+        }
+      }
+      //edges.add(EdgesExtra);
+    }
+    $(window).load(function () {
+      $(".input .body").bind("input", function(evt) {
+        if(!isNormalInteger(evt.target.innerHTML) && evt.target.innerHTML != "") {
+          alert("In what country is " + evt.target.innerHTML + " a nonnegative integer?" );
+          evt.target.innerHTML = 0;
+        }
+
+      });
+$(".marking .body").bind("input", function(evt) {
+  if(!isNormalInteger(evt.target.innerHTML) && evt.target.innerHTML != "") {
+    alert("Error #69: Too many/little chromosomes" );
+    evt.target.innerHTML = 0;
+  }
+
+});$(".output .body").bind("input", function(evt) {
+  if(!isNormalInteger(evt.target.innerHTML) && evt.target.innerHTML != "") {
+    alert("PEBKAC error: Replace user" );
+    evt.target.innerHTML = 0;
+  }
+
+});
+
+      $("#places").change(function() {updateTables();});
+      $("#transitions").change(function() {updateTables();})
+      updateTables();
+
+    });
+    //stolen from stackoverflow 10834796
+    function isNormalInteger(str) {
+      var n = ~~Number(str);
+      return String(n) === str && n >= 0;
+    }
+  </script>
+</head>
+
+<body>
+<nav class="navbar navbar-inverse navbar-fixed-top" role="navigation">
+      <div class="container">
+        <div class="navbar-header">
+          <a class="navbar-brand" href="#"><b>Petrinet Project</b></a>
+        </div>
+      </div>
+    </nav>
+<div id="container">
+  <div id="network"></div>
+  <div id="form">
+    <form role="form">
+    <table>
+      <tr>
+        <td><div class="input-group">
+          <span class="input-group-addon"># of Transitions</span>
+          <input type="number" class="form-control" placeholder="1" value=1 id="transitions" min=1 step=1>
+        </div></td>
+        <td class="centerbuffer">&nbsp;</td>
+        <td><div class="input-group">
+          <span class="input-group-addon">&nbsp;&nbsp;# of Places&nbsp;&nbsp;</span>
+          <input type="number" class="form-control" placeholder="1" value=1 id="places" min=1 step=1>
+        </div></td>
+      </tr>
+    </table>
+    <br/>
+
+<div class="inputcontainer marking">
+<div class="relativeContainer marking">
+   <!-- Fixed Column for both scroller -->
+   <div class="fixedTB">
+       <table border="1" width="72px" cellspacing="1" cellpadding="0" >
+         <tr><td>Marking</td></tr>
+       </table>
+   </div>
+   <div class="leftContainer">
+       <!-- Fixed Column for horz scroller -->
+       <div class="leftSBWrapper">
+           <table border="1" width="72px" cellspacing="1" cellpadding="0" class="left">
+
+            </table>
+        </div>
+    </div>
+    <div class="rightContainer">
+        <div class="topSBWrapper">
+            <table border="1" width="100%" cellspacing="1" cellpadding="0" align="center">
+               <tr class="head">
+
+               </tr>
+            </table>
+        </div>
+        <div class="SBWrapper">
+            <table border="1" width="100%" cellspacing="1" cellpadding="0" align="center" class="body" >
+
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+<br/>
+    <div class="inputcontainer input">
+   <div class="relativeContainer">
+       <!-- Fixed Column for both scroller -->
+       <div class="fixedTB">
+           <table border="1" width="72px" cellspacing="1" cellpadding="0" >
+             <tr><td>Input</td></tr>
+           </table>
+       </div>
+       <div class="leftContainer">
+           <!-- Fixed Column for horz scroller -->
+           <div class="leftSBWrapper">
+               <table border="1" width="72px" cellspacing="1" cellpadding="0" class="left">
+
+                </table>
+            </div>
+        </div>
+        <div class="rightContainer">
+            <div class="topSBWrapper">
+                <table border="1" width="100%" cellspacing="1" cellpadding="0" align="center">
+                   <tr class="head">
+
+                   </tr>
+                </table>
+            </div>
+            <div class="SBWrapper">
+                <table border="1" width="100%" cellspacing="1" cellpadding="0" align="center" class="body" >
+
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="inputcontainer output">
+  <br/>
+<div class="relativeContainer">
+   <!-- Fixed Column for both scroller -->
+   <div class="fixedTB">
+       <table border="1" width="72px" cellspacing="1" cellpadding="0" >
+         <tr><td>Output</td></tr>
+       </table>
+   </div>
+   <div class="leftContainer">
+       <!-- Fixed Column for horz scroller -->
+       <div class="leftSBWrapper">
+           <table border="1" width="72px" cellspacing="1" cellpadding="0" class="left">
+
+            </table>
+        </div>
+    </div>
+    <div class="rightContainer">
+        <div class="topSBWrapper">
+            <table border="1" width="100%" cellspacing="1" cellpadding="0" align="center">
+               <tr class="head">
+
+               </tr>
+            </table>
+        </div>
+        <div class="SBWrapper">
+            <table border="1" width="100%" cellspacing="1" cellpadding="0" align="center" class="body" >
+
+            </table>
+        </div>
+    </div>
+</div>
+</div>
+<br/>
+
+
+<input style="width: 100%" type=button onClick="reachabilityTree()" class="btn btn-primary" role="button" value="Calculate">
+
+
+
+
+
+
+  </form>
+  </div>
+</div>
+
+
+
+</body>
+</html>
