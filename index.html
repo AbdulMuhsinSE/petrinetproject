@@ -305,6 +305,7 @@ td { padding: 2px; text-align: center;}
       a.Marking = initialMarking();
       a.fireTransitions(inputMatrix(), outputMatrix());
       makeTree(a);
+	  calculateSM(inputMatrix(), outputMatrix());
     }
 
     function makeTree(root) {
@@ -439,7 +440,13 @@ $(".marking .body").bind("input", function(evt) {
 				break;
 			}
 		}
-		if(isStateMachine == true){console.log("State Machine = true");}
+		
+		if(isStateMachine == true){
+			var smstate = document.createElement("p");
+			var textnode = document.createTextNode("This is a State Machine");
+			smstate.appendChild(textnode);
+			document.getElementById("form").appendChild(smstate);
+		}
 		calculateMG(iArray,oArray);
 	}
 	
@@ -457,7 +464,6 @@ $(".marking .body").bind("input", function(evt) {
 				 isMarkedGraph = false;
 				if( isStateMachine==false){
 				//console.log( isMarkedGraph);
-				calculateFC(iArray,oArray);
 				}
 				break;
 			}
@@ -476,10 +482,17 @@ $(".marking .body").bind("input", function(evt) {
 				 isMarkedGraph = false;
 				if( isStateMachine==false) {
 				//console.log( isMarkedGraph);
-				calculateFC(iArray,oArray);
 				}
 				break;
 			}
+		}
+		if(isMarkedGraph == true){
+			var smstate = document.createElement("p");
+			var textnode = document.createTextNode("This is a Marked Graph");
+			smstate.appendChild(textnode);
+			document.getElementById("form").appendChild(smstate);
+		} else {
+			calculateFC(iArray,oArray);
 		}
 		if (isMarkedGraph==true){console.log("Marked Graph = true");}
 	}
@@ -497,7 +510,6 @@ $(".marking .body").bind("input", function(evt) {
 			
 			if(transValue!=1){
 				 isFreeChoice = false;
-				calculateEFC(iArray,oArray);
 				break;
 			}
 		}
@@ -511,10 +523,18 @@ $(".marking .body").bind("input", function(evt) {
 			
 			if(placeValue!=1){
 				 isFreeChoice = false;
-				calculateEFC(iArray,oArray);
 				break;
 			}
 		}
+		if(isFreeChoice == true){
+			var smstate = document.createElement("p");
+			var textnode = document.createTextNode("This is a Free Choice Net");
+			smstate.appendChild(textnode);
+			document.getElementById("form").appendChild(smstate);
+		} else {
+			calculateEFC(iArray,oArray);
+		}
+		
 		if(this.isFreeChoice==true)console.log("FreeChoice = true");
 	}
 	
@@ -535,7 +555,6 @@ $(".marking .body").bind("input", function(evt) {
 						r = i+1;
 						if((iArray[j][positions[i]]) != (iArray[j][positions[r]])){
 							 isExtendedFreeChoice = false;
-							calculateAC(iArray,oArray);
 							break;
 						}
 					}
@@ -544,6 +563,14 @@ $(".marking .body").bind("input", function(evt) {
 			if(positions.length == iArray[0].length){
 				break;
 			}
+		}
+		if(isExtendedFreeChoice == true){
+			var smstate = document.createElement("p");
+			var textnode = document.createTextNode("This is an Extended Free Choice Net");
+			smstate.appendChild(textnode);
+			document.getElementById("form").appendChild(smstate);
+		} else {
+			calculateAC(iArray,oArray);
 		}
 		if(this.isExtendedFreeChoice==true)console.log("EFC = true");
 	}
@@ -574,6 +601,12 @@ $(".marking .body").bind("input", function(evt) {
 			}
 		}
 		if(this.isAC==true)console.log("AC=true");
+		if(isAC == true){
+			var smstate = document.createElement("p");
+			var textnode = document.createTextNode("This is an AC net");
+			smstate.appendChild(textnode);
+			document.getElementById("form").appendChild(smstate);
+		}
 	}
   </script>
 </head>
